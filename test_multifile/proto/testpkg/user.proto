@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package testpkg;
+
+option go_package = "test_multifile/gen/testpkg";
+
+import "google/protobuf/empty.proto";
+import "../authorize/authorize.proto";
+
+message User {
+  string id = 1;
+  string name = 2;
+}
+
+message GetUserRequest {
+  string user_id = 1;
+}
+
+service UserService {
+  rpc GetUser(GetUserRequest) returns (User) {
+    option (authorize.rules) = {
+      rules: [
+        {
+          expression: "user.Roles.includes('user') || user.IsSuperAdmin",
+        }
+      ]
+    };
+  }
+  
+  rpc CreateUser(User) returns (google.protobuf.Empty) {
+    option (authorize.rules) = {
+      rules: [
+        {
+          expression: "user.Roles.includes('admin') || user.IsSuperAdmin",
+        }
+      ]
+    };
+  }
+}

@@ -40,36 +40,68 @@ func (m *module) InitContext(c pgs.BuildContext) {
 }
 
 func (m *module) Execute(targets map[string]pgs.File, packages map[string]pgs.Package) []pgs.Artifact {
+	// Group files by Go package name to avoid function name conflicts
+	packageFiles := make(map[string][]pgs.File)
+
 	for _, f := range targets {
 		if f.BuildTarget() {
-			m.generate(f)
+			// Get the Go package name for this file
+			goPackage := m.Context.PackageName(f).String()
+			packageFiles[goPackage] = append(packageFiles[goPackage], f)
 		}
 	}
+
+	// Generate one authorizer file per Go package
+	for goPackage, files := range packageFiles {
+		m.generateForPackage(goPackage, files)
+	}
+
 	return m.Artifacts()
 }
 
-func (m *module) generate(f pgs.File) {
+// generateForPackage generates a single authorizer file for all services in a Go package
+func (m *module) generateForPackage(goPackage string, files []pgs.File) {
 	var rules = map[string]*authorize.RuleSet{}
-	for _, s := range f.Services() {
-		for _, method := range s.Methods() {
-			var ruleSet authorize.RuleSet
-			ok, err := method.Extension(authorize.E_Rules, &ruleSet)
-			if err != nil {
-				m.AddError(err.Error())
-				continue
+	var firstFile pgs.File // Used for generating the output file name
+
+	// Collect rules from all files in this package
+	for _, f := range files {
+		if firstFile == nil {
+			firstFile = f
+		}
+
+		for _, s := range f.Services() {
+			for _, method := range s.Methods() {
+				var ruleSet authorize.RuleSet
+				ok, err := method.Extension(authorize.E_Rules, &ruleSet)
+				if err != nil {
+					m.AddError(err.Error())
+					continue
+				}
+				if !ok {
+					continue
+				}
+				// ServiceName_MethodName_FullMethodName
+				name := fmt.Sprintf("%s_%s_FullMethodName", s.Name().UpperCamelCase(), method.Name().UpperCamelCase())
+				rules[name] = &ruleSet
 			}
-			if !ok {
-				continue
-			}
-			// EchoService_Echo_FullMethodName
-			name := fmt.Sprintf("%s_%s_FullMethodName", s.Name().UpperCamelCase(), method.Name().UpperCamelCase())
-			rules[name] = &ruleSet
 		}
 	}
+
 	if len(rules) == 0 {
 		return
 	}
-	name := f.InputPath().SetExt(".pb.authorizer.go").String()
+
+	// Generate output filename: use package name instead of individual file name
+	// This ensures one authorizer file per Go package
+	outputName := strings.ReplaceAll(goPackage, "/", "_") + ".pb.authorizer.go"
+	if firstFile != nil {
+		// Use the directory of the first file but change the filename
+		firstFilePath := firstFile.InputPath().SetExt(".pb.authorizer.go").String()
+		dir := strings.TrimSuffix(firstFilePath, firstFile.InputPath().BaseName()+".pb.authorizer.go")
+		outputName = dir + outputName
+	}
+
 	var (
 		t   *template.Template
 		err error
@@ -83,17 +115,21 @@ func (m *module) generate(f pgs.File) {
 		}
 	case "cel":
 		t, err = template.New("authorizer").Parse(celTmpl)
+		if err != nil {
+			m.AddError(err.Error())
+			return
+		}
 	}
 
 	buffer := &bytes.Buffer{}
 	if err := t.Execute(buffer, templateData{
-		Package: m.Context.PackageName(f).String(),
+		Package: goPackage,
 		Rules:   rules,
 	}); err != nil {
 		m.AddError(err.Error())
 		return
 	}
-	m.AddGeneratorFile(name, buffer.String())
+	m.AddGeneratorFile(outputName, buffer.String())
 }
 
 type templateData struct {

@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package testpkg;
+
+option go_package = "test_multifile/gen/testpkg";
+
+import "google/protobuf/empty.proto";
+import "../authorize/authorize.proto";
+
+message Order {
+  string id = 1;
+  string user_id = 2;
+  double amount = 3;
+}
+
+message CreateOrderRequest {
+  string user_id = 1;
+  double amount = 2;
+}
+
+service OrderService {
+  rpc CreateOrder(CreateOrderRequest) returns (Order) {
+    option (authorize.rules) = {
+      rules: [
+        {
+          expression: "user.AccountIds.includes(request.UserId) && user.Roles.includes('user')",
+        },
+        {
+          expression: "user.IsSuperAdmin",
+        }
+      ]
+    };
+  }
+  
+  rpc DeleteOrder(Order) returns (google.protobuf.Empty) {
+    option (authorize.rules) = {
+      rules: [
+        {
+          expression: "user.Roles.includes('admin') || user.IsSuperAdmin",
+        }
+      ]
+    };
+  }
+}

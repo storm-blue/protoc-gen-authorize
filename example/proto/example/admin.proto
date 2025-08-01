@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package authorize;
+
+option go_package = "github.com/storm-blue/protoc-gen-authorize/example/gen/example;example";
+
+import "google/protobuf/empty.proto";
+import "authorize/authorize.proto";
+
+message AdminRequest {
+  string action = 1;
+  string target = 2;
+}
+
+// Additional service in the same Go package but different proto file
+service AdminService {
+  rpc ExecuteAdminAction(AdminRequest) returns (google.protobuf.Empty) {
+    option (authorize.rules) = {
+      rules: [
+        {
+          expression: "user.IsSuperAdmin",
+        },
+        {
+          expression: "user.Roles.includes('super-admin')",
+        }
+      ]
+    };
+  }
+  
+  rpc ViewLogs(google.protobuf.Empty) returns (google.protobuf.Empty) {
+    option (authorize.rules) = {
+      rules: [
+        {
+          expression: "user.Roles.includes('admin') || user.IsSuperAdmin",
+        }
+      ]
+    };
+  }
+}
