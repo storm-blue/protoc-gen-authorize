@@ -135,7 +135,7 @@ func permissionsMatch(needPermissions []string, permissions []string) (bool, err
 
 func permissionMatch(needPermission string, permission string) (bool, error) {
 	permissionRegexStr := regexp.QuoteMeta(permission)
-	permissionRegexStr = strings.ReplaceAll(permissionRegexStr, "\\*", "[a-zA-Z0-9_/.-]*")
+	permissionRegexStr = strings.ReplaceAll(permissionRegexStr, "\\*", "[a-zA-Z0-9_/.*-]*")
 	permissionRegexStr = "^" + permissionRegexStr + "$"
 	permissionRegex, err := regexp.Compile(permissionRegexStr)
 	if err != nil {
