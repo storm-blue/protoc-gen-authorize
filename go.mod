@@ -11,6 +11,7 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.0.1
 	github.com/lyft/protoc-gen-star v0.6.2
 	github.com/mitchellh/mapstructure v1.5.0
+	github.com/valyala/fasttemplate v1.2.2
 	google.golang.org/grpc v1.59.0
 	google.golang.org/protobuf v1.36.6
 )
@@ -24,7 +25,6 @@ require (
 	github.com/spf13/afero v1.14.0 // indirect
 	github.com/stoewer/go-strcase v1.3.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
-	github.com/valyala/fasttemplate v1.2.2 // indirect
 	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1 // indirect
 	golang.org/x/mod v0.26.0 // indirect
 	golang.org/x/net v0.42.0 // indirect

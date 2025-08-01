@@ -80,7 +80,11 @@ func (c *CelAuthorizer) AuthorizeMethod(_ context.Context, method string, params
 		return false, fmt.Errorf("authorizer: failed to decode user: %v", err.Error())
 	}
 
-	preprocess(rules, map[string]interface{}{"user": user, "request": request})
+	data := map[string]interface{}{
+		"user":    user,
+		"request": request,
+	}
+	preprocess(rules, data)
 	programs, err := c.getMethodPrograms(rules)
 	if err != nil {
 		return false, err
