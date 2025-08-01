@@ -60,7 +60,7 @@ func (a *MatchAuthorizer) AuthorizeMethod(ctx context.Context, method string, pa
 	if user, ok := params.User.(map[string]interface{}); !ok {
 		return false, fmt.Errorf("authorizer: failed to decode user: %v", reflect.TypeOf(params.User))
 	} else {
-		if permissions, ok = user["permissions"].([]string); !ok {
+		if permissions, ok = user["Permissions"].([]string); !ok {
 			return false, fmt.Errorf("authorizer: user does not have any permissions")
 		}
 	}
