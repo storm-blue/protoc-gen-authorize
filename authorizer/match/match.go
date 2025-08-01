@@ -3,7 +3,6 @@ package match
 import (
 	"context"
 	"fmt"
-	"reflect"
 	"regexp"
 	"strings"
 	"text/template"
@@ -41,7 +40,7 @@ func (a *MatchAuthorizer) AuthorizeMethod(ctx context.Context, method string, pa
 	rules, ok := a.rules[method]
 	if !ok {
 		svc := strings.Split(method, "/")[1]
-		for k, _ := range a.rules {
+		for k := range a.rules {
 			if strings.HasPrefix(k, "/"+svc) {
 				return true, nil
 			}
@@ -56,13 +55,9 @@ func (a *MatchAuthorizer) AuthorizeMethod(ctx context.Context, method string, pa
 		metaMap[k] = strings.Join(v, ",")
 	}
 
-	var permissions []string
-	if user, ok := params.User.(map[string]interface{}); !ok {
-		return false, fmt.Errorf("authorizer: failed to decode user: %v", reflect.TypeOf(params.User))
-	} else {
-		if permissions, ok = user["Permissions"].([]string); !ok {
-			return false, fmt.Errorf("authorizer: user does not have any permissions")
-		}
+	permissions, err := GetPermissions(params.User)
+	if err != nil {
+		return false, fmt.Errorf("authorizer: failed to get permissions: %v", err.Error())
 	}
 
 	if len(permissions) == 0 {
