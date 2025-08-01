@@ -7,9 +7,9 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/autom8ter/protoc-gen-authorize/authorizer"
-	"github.com/autom8ter/protoc-gen-authorize/example/gen/example"
-	"github.com/autom8ter/protoc-gen-authorize/example/server"
+	"github.com/storm-blue/protoc-gen-authorize/authorizer"
+	"github.com/storm-blue/protoc-gen-authorize/example/gen/example"
+	"github.com/storm-blue/protoc-gen-authorize/example/server"
 )
 
 var testUser = &example.User{

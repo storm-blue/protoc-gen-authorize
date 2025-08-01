@@ -6,8 +6,8 @@ import (
 
 	"github.com/autom8ter/proto/gen/authorize"
 
-	"github.com/autom8ter/protoc-gen-authorize/authorizer"
-	"github.com/autom8ter/protoc-gen-authorize/authorizer/cel"
+	"github.com/storm-blue/protoc-gen-authorize/authorizer"
+	"github.com/storm-blue/protoc-gen-authorize/authorizer/cel"
 )
 
 type fixture struct {

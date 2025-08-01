@@ -24,13 +24,13 @@ expression-based rules for robust and efficient request handling 💼.
 The plugin can be installed with the following command:
 
 ```bash
-    go install github.com/autom8ter/protoc-gen-authorize
+    go install github.com/storm-blue/protoc-gen-authorize
 ```
 
 The interceptor library can be installed with the following command:
 
 ```bash
-    go get github.com/autom8ter/protoc-gen-authorize/authorizer
+    go get github.com/storm-blue/protoc-gen-authorize/authorizer
 ```
 
 ## Code Generation

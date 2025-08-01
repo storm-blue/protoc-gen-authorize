@@ -5,7 +5,7 @@ import (
 
 	"google.golang.org/protobuf/types/known/emptypb"
 
-	"github.com/autom8ter/protoc-gen-authorize/example/gen/example"
+	"github.com/storm-blue/protoc-gen-authorize/example/gen/example"
 )
 
 type exampleServer struct {

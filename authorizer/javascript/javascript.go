@@ -10,7 +10,7 @@ import (
 
 	"github.com/autom8ter/proto/gen/authorize"
 
-	"github.com/autom8ter/protoc-gen-authorize/authorizer"
+	"github.com/storm-blue/protoc-gen-authorize/authorizer"
 )
 
 // Opt is a functional option for configuring a JavascriptAuthorizer

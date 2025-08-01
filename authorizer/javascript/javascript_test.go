@@ -6,8 +6,8 @@ import (
 
 	"github.com/autom8ter/proto/gen/authorize"
 
-	"github.com/autom8ter/protoc-gen-authorize/authorizer"
-	"github.com/autom8ter/protoc-gen-authorize/authorizer/javascript"
+	"github.com/storm-blue/protoc-gen-authorize/authorizer"
+	"github.com/storm-blue/protoc-gen-authorize/authorizer/javascript"
 )
 
 type fixture struct {
@@ -354,7 +354,7 @@ func TestJavascriptAuthorizer_AuthorizeMethod(t *testing.T) {
 /*
 goos: darwin
 goarch: amd64
-pkg: github.com/autom8ter/protoc-gen-authorize/authorizer/javascript
+pkg: github.com/storm-blue/protoc-gen-authorize/authorizer/javascript
 cpu: Intel(R) Core(TM) i7-7820HQ CPU @ 2.90GHz
 BenchmarkJavascriptAuthorizer_AuthorizeMethod
 BenchmarkJavascriptAuthorizer_AuthorizeMethod/basic_request_field_rule_1_(allow)

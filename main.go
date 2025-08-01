@@ -6,7 +6,7 @@ import (
 	_ "github.com/lyft/protoc-gen-star/lang/go"
 	pgsgo "github.com/lyft/protoc-gen-star/lang/go"
 
-	"github.com/autom8ter/protoc-gen-authorize/module"
+	"github.com/storm-blue/protoc-gen-authorize/module"
 )
 
 func main() {

@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
-	"github.com/autom8ter/protoc-gen-authorize/example/gen/example"
+	"github.com/storm-blue/protoc-gen-authorize/example/gen/example"
 )
 
 func Test(t *testing.T) {
