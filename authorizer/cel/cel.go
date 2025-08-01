@@ -3,6 +3,7 @@ package cel
 import (
 	"context"
 	"fmt"
+	"github.com/valyala/fasttemplate"
 	"strings"
 	"sync"
 
@@ -63,10 +64,6 @@ func (c *CelAuthorizer) AuthorizeMethod(_ context.Context, method string, params
 	if len(rules.Rules) == 1 && rules.Rules[0].Expression == "*" {
 		return true, nil
 	}
-	programs, err := c.getMethodPrograms(rules)
-	if err != nil {
-		return false, err
-	}
 
 	var (
 		metaMap = map[string]string{}
@@ -81,6 +78,12 @@ func (c *CelAuthorizer) AuthorizeMethod(_ context.Context, method string, params
 	}
 	if err := mapstructure.Decode(params.User, &user); err != nil {
 		return false, fmt.Errorf("authorizer: failed to decode user: %v", err.Error())
+	}
+
+	preprocess(rules, map[string]interface{}{"user": user, "request": request})
+	programs, err := c.getMethodPrograms(rules)
+	if err != nil {
+		return false, err
 	}
 
 	for _, program := range programs {
@@ -103,6 +106,15 @@ func (c *CelAuthorizer) AuthorizeMethod(_ context.Context, method string, params
 		}
 	}
 	return false, nil
+}
+
+func preprocess(rules *authorize.RuleSet, data map[string]interface{}) {
+	for _, rule := range rules.Rules {
+		expr := rule.Expression
+		tpl := fasttemplate.New(expr, "${", "}")
+		result := tpl.ExecuteString(data)
+		rule.Expression = result
+	}
 }
 
 func (c *CelAuthorizer) getMethodPrograms(rules *authorize.RuleSet) ([]cel.Program, error) {
