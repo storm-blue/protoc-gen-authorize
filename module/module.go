@@ -225,7 +225,7 @@ import (
 // authorize the method. The RuleSets are evaluated in order and the first rule that evaluates to true will authorize
 // the request. The mapping can be generated with the protoc-gen-authorize plugin.
 func NewAuthorizer(opts ...match.Opt) (*match.MatchAuthorizer, error) {
-	return match.NewBatchAuthorizer(map[string]*authorize.RuleSet{
+	return match.NewMatchAuthorizer(map[string]*authorize.RuleSet{
 	{{- range $key, $value := .Rules }}
 	{{$key}}: {
 		Rules: []*authorize.Rule{
