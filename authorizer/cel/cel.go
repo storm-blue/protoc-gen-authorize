@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/valyala/fasttemplate"
+	"google.golang.org/protobuf/proto"
 	"strings"
 	"sync"
 
@@ -61,6 +62,8 @@ func (c *CelAuthorizer) AuthorizeMethod(_ context.Context, method string, params
 		}
 		return false, nil
 	}
+
+	rules = proto.Clone(rules).(*authorize.RuleSet)
 	if len(rules.Rules) == 1 && rules.Rules[0].Expression == "*" {
 		return true, nil
 	}
