@@ -224,7 +224,7 @@ import (
 // NewAuthorizer returns a new javascript authorizer. The rules map is a map of method names to RuleSets. The RuleSets are used to
 // authorize the method. The RuleSets are evaluated in order and the first rule that evaluates to true will authorize
 // the request. The mapping can be generated with the protoc-gen-authorize plugin.
-func NewAuthorizer(opts ...match.Opt) (*match.CelAuthorizer, error) {
+func NewAuthorizer(opts ...match.Opt) (*match.MatchAuthorizer, error) {
 	return match.NewBatchAuthorizer(map[string]*authorize.RuleSet{
 	{{- range $key, $value := .Rules }}
 	{{$key}}: {
