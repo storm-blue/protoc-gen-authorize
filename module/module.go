@@ -3,6 +3,7 @@ package module
 import (
 	"bytes"
 	"fmt"
+	"github.com/storm-blue/protoc-gen-authorize/authorizer/match"
 	"strings"
 	"text/template"
 
@@ -81,6 +82,16 @@ func (m *module) generateForPackage(goPackage string, files []pgs.File) {
 				if !ok {
 					continue
 				}
+
+				if m.authorizer == "batch" {
+					for _, r := range ruleSet.Rules {
+						err = match.IsValidExpression(r.Expression)
+						if err != nil {
+							panic(err)
+						}
+					}
+				}
+
 				// ServiceName_MethodName_FullMethodName
 				name := fmt.Sprintf("%s_%s_FullMethodName", s.Name().UpperCamelCase(), method.Name().UpperCamelCase())
 				rules[name] = &ruleSet
@@ -115,6 +126,12 @@ func (m *module) generateForPackage(goPackage string, files []pgs.File) {
 		}
 	case "cel":
 		t, err = template.New("authorizer").Parse(celTmpl)
+		if err != nil {
+			m.AddError(err.Error())
+			return
+		}
+	case "batch":
+		t, err = template.New("authorizer").Parse(batchTmpl)
 		if err != nil {
 			m.AddError(err.Error())
 			return
@@ -180,6 +197,35 @@ import (
 // the request. The mapping can be generated with the protoc-gen-authorize plugin.
 func NewAuthorizer(opts ...cel.Opt) (*cel.CelAuthorizer, error) {
 	return cel.NewCelAuthorizer(map[string]*authorize.RuleSet{
+	{{- range $key, $value := .Rules }}
+	{{$key}}: {
+		Rules: []*authorize.Rule{
+		{{- range $value.Rules }}
+			{
+				Expression: "{{ .Expression }}",
+			},
+		{{- end }}
+		},
+	},
+	{{- end }}
+}, opts...)
+}
+`
+
+var batchTmpl = `
+package {{ .Package }}
+
+import (
+	"github.com/autom8ter/proto/gen/authorize"
+
+	"github.com/storm-blue/protoc-gen-authorize/authorizer/batch"
+)
+
+// NewAuthorizer returns a new javascript authorizer. The rules map is a map of method names to RuleSets. The RuleSets are used to
+// authorize the method. The RuleSets are evaluated in order and the first rule that evaluates to true will authorize
+// the request. The mapping can be generated with the protoc-gen-authorize plugin.
+func NewAuthorizer(opts ...batch.Opt) (*batch.CelAuthorizer, error) {
+	return batch.NewBatchAuthorizer(map[string]*authorize.RuleSet{
 	{{- range $key, $value := .Rules }}
 	{{$key}}: {
 		Rules: []*authorize.Rule{
