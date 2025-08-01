@@ -49,12 +49,11 @@ func NewCelAuthorizer(rules map[string]*authorize.RuleSet, opts ...Opt) (*CelAut
 
 // AuthorizeMethod authorizes a gRPC method the RuleExecutionParams and returns a boolean representing whether the
 // request is authorized or not.
-func (c *CelAuthorizer) AuthorizeMethod(ctx context.Context, method string, params *authorizer.RuleExecutionParams) (bool, error) {
+func (c *CelAuthorizer) AuthorizeMethod(_ context.Context, method string, params *authorizer.RuleExecutionParams) (bool, error) {
 	rules, ok := c.rules[method]
 	if !ok {
 		svc := strings.Split(method, "/")[1]
-		fmt.Println(svc)
-		for k, _ := range c.rules {
+		for k := range c.rules {
 			if strings.HasPrefix(k, "/"+svc) {
 				return true, nil
 			}
