@@ -83,7 +83,7 @@ func (m *module) generateForPackage(goPackage string, files []pgs.File) {
 					continue
 				}
 
-				if m.authorizer == "batch" {
+				if m.authorizer == "match" {
 					for _, r := range ruleSet.Rules {
 						err = match.IsValidExpression(r.Expression)
 						if err != nil {
@@ -130,8 +130,8 @@ func (m *module) generateForPackage(goPackage string, files []pgs.File) {
 			m.AddError(err.Error())
 			return
 		}
-	case "batch":
-		t, err = template.New("authorizer").Parse(batchTmpl)
+	case "match":
+		t, err = template.New("authorizer").Parse(matchTmpl)
 		if err != nil {
 			m.AddError(err.Error())
 			return
@@ -212,20 +212,20 @@ func NewAuthorizer(opts ...cel.Opt) (*cel.CelAuthorizer, error) {
 }
 `
 
-var batchTmpl = `
+var matchTmpl = `
 package {{ .Package }}
 
 import (
 	"github.com/autom8ter/proto/gen/authorize"
 
-	"github.com/storm-blue/protoc-gen-authorize/authorizer/batch"
+	"github.com/storm-blue/protoc-gen-authorize/authorizer/match"
 )
 
 // NewAuthorizer returns a new javascript authorizer. The rules map is a map of method names to RuleSets. The RuleSets are used to
 // authorize the method. The RuleSets are evaluated in order and the first rule that evaluates to true will authorize
 // the request. The mapping can be generated with the protoc-gen-authorize plugin.
-func NewAuthorizer(opts ...batch.Opt) (*batch.CelAuthorizer, error) {
-	return batch.NewBatchAuthorizer(map[string]*authorize.RuleSet{
+func NewAuthorizer(opts ...match.Opt) (*match.CelAuthorizer, error) {
+	return match.NewBatchAuthorizer(map[string]*authorize.RuleSet{
 	{{- range $key, $value := .Rules }}
 	{{$key}}: {
 		Rules: []*authorize.Rule{
