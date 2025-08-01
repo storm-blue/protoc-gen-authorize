@@ -228,6 +228,41 @@ func Test_permissionMatch(t *testing.T) {
 			want:           false,
 			wantErr:        false,
 		},
+		{
+			name:           "TEST",
+			needPermission: "ingress:*:add",
+			permission:     "*:*.*/*:add",
+			want:           false,
+			wantErr:        false,
+		},
+		{
+			name:           "TEST",
+			needPermission: "ingress::add",
+			permission:     "*:*.*/*:add",
+			want:           false,
+			wantErr:        false,
+		},
+		{
+			name:           "TEST",
+			needPermission: "ingress::add",
+			permission:     "*:*:add",
+			want:           true,
+			wantErr:        false,
+		},
+		{
+			name:           "TEST",
+			needPermission: "ingress::::add",
+			permission:     "*:*:add",
+			want:           false,
+			wantErr:        false,
+		},
+		{
+			name:           "TEST",
+			needPermission: "ingress:qa1-api.xinfei.cn:add",
+			permission:     "*:*:add",
+			want:           true,
+			wantErr:        false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
