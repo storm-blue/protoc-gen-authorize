@@ -35,7 +35,7 @@ func NewMatchAuthorizer(rules map[string]*authorize.RuleSet, opts ...Opt) (*Matc
 
 // AuthorizeMethod authorizes a gRPC method the RuleExecutionParams and returns a boolean representing whether the
 // request is authorized or not.
-func (a *MatchAuthorizer) AuthorizeMethod(ctx context.Context, method string, params *authorizer.RuleExecutionParams) (bool, error) {
+func (a *MatchAuthorizer) AuthorizeMethod(_ context.Context, method string, params *authorizer.RuleExecutionParams) (bool, error) {
 	// return false if no rules exist for the method
 	rules, ok := a.rules[method]
 	if !ok {
@@ -135,7 +135,7 @@ func permissionsMatch(needPermissions []string, permissions []string) (bool, err
 
 func permissionMatch(needPermission string, permission string) (bool, error) {
 	permissionRegexStr := regexp.QuoteMeta(permission)
-	permissionRegexStr = strings.ReplaceAll(permissionRegexStr, "\\*", "[a-zA-Z0-9_/.*-]*")
+	permissionRegexStr = strings.ReplaceAll(permissionRegexStr, "\\*", "[\\p{Han}a-zA-Z0-9_/.*-]*")
 	permissionRegexStr = "^" + permissionRegexStr + "$"
 	permissionRegex, err := regexp.Compile(permissionRegexStr)
 	if err != nil {

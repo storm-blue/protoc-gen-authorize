@@ -298,6 +298,13 @@ func Test_permissionMatch(t *testing.T) {
 			want:           false,
 			wantErr:        false,
 		},
+		{
+			name:           "TEST",
+			needPermission: "*/a:qa1-api.xinfei.我擦嘞:add",
+			permission:     "*:*:add",
+			want:           true,
+			wantErr:        false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
