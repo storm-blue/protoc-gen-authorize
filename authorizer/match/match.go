@@ -80,42 +80,9 @@ func (a *MatchAuthorizer) AuthorizeMethod(_ context.Context, method string, para
 	return permissionsMatch(needPermissions, permissions)
 }
 
-var parseKyeRegex = regexp.MustCompile(`\${([^{}]+)}`)
-
-func parseKeys(template string) []string {
-	matches := parseKyeRegex.FindAllStringSubmatch(template, -1)
-
-	keys := make([]string, 0, len(matches))
-	for _, match := range matches {
-		if len(match) > 1 {
-			keys = append(keys, match[1])
-		}
-	}
-	return keys
-}
-
 func IsValidExpression(expression string) error {
-	keys := parseKeys(expression)
-	for _, key := range keys {
-		if err := validateKey(key); err != nil {
-			return err
-		}
-	}
-
-	_, err := buildGoTemplate(convertToGoTemplate(expression))
+	_, err := buildGoTemplate(expression)
 	return err
-}
-
-var validKeyRegex = regexp.MustCompile(`^[a-zA-Z0-9_]+(?:\.[a-zA-Z0-9_]+)*$`)
-
-func validateKey(key string) error {
-	if key == "user.Permissions" {
-		return fmt.Errorf("user.Permissions is not allowed")
-	}
-	if !validKeyRegex.MatchString(key) {
-		return fmt.Errorf("invalid key: %s", key)
-	}
-	return nil
 }
 
 func permissionsMatch(needPermissions []string, permissions []string) (bool, error) {
@@ -149,17 +116,8 @@ func permissionMatch(needPermission string, permission string) (bool, error) {
 	return false, nil
 }
 
-func convertToGoTemplate(t1 string) string {
-	keys := parseKeys(t1)
-	_t := t1
-	for _, key := range keys {
-		_t = strings.ReplaceAll(_t, "${"+key+"}", "${."+key+"}")
-	}
-	return _t
-}
-
 func buildGoTemplate(t1 string) (*template.Template, error) {
-	return template.New("").Delims("${", "}").Parse(t1)
+	return template.New("").Parse(t1)
 }
 
 func rendNeedPermission(t1 string, data map[string]interface{}) (string, error) {
@@ -178,8 +136,7 @@ func getNeedPermissions(expressions []string, data map[string]interface{}) ([]st
 	var needPermissions []string
 
 	for _, expression := range expressions {
-		_t := convertToGoTemplate(expression)
-		needPermission, err := rendNeedPermission(_t, data)
+		needPermission, err := rendNeedPermission(expression, data)
 		if err != nil {
 			return nil, err
 		}

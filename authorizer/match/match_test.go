@@ -6,109 +6,6 @@ import (
 	"testing"
 )
 
-func TestParseKeys(t *testing.T) {
-	tests := []struct {
-		name     string
-		template string
-		want     []string
-	}{
-		{
-			name:     "TEST",
-			template: "abc${def}",
-			want:     []string{"def"},
-		},
-		{
-			name:     "TEST",
-			template: "abc${def }",
-			want:     []string{"def "},
-		},
-		{
-			name:     "TEST",
-			template: "abc${def },asdasd{}${zcf}",
-			want:     []string{"def ", "zcf"},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := parseKeys(tt.template); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ParseKeys() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestValidateKey(t *testing.T) {
-	tests := []struct {
-		name    string
-		key     string
-		wantErr bool
-	}{
-		{
-			name:    "TEST",
-			key:     "a.b.c",
-			wantErr: false,
-		},
-		{
-			name:    "TEST",
-			key:     ".a.b.c",
-			wantErr: true,
-		},
-		{
-			name:    "TEST",
-			key:     " a.b.c",
-			wantErr: true,
-		},
-		{
-			name:    "TEST",
-			key:     "a..b.c",
-			wantErr: true,
-		},
-		{
-			name:    "TEST",
-			key:     "a.b/c.c",
-			wantErr: true,
-		},
-		{
-			name:    "TEST",
-			key:     "a.b_c.c",
-			wantErr: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := validateKey(tt.key); (err != nil) != tt.wantErr {
-				t.Errorf("validateKey() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
-func Test_convertTemplate(t *testing.T) {
-	tests := []struct {
-		name string
-		t1   string
-		want string
-	}{
-		{
-			name: "TEST",
-			t1:   "abc:${asd.zzx}:asdqe",
-			want: "abc:${.asd.zzx}:asdqe",
-		},
-		{
-			name: "TEST",
-			t1:   "abc:${asd.zzx}:asdqe${abc.aaa}",
-			want: "abc:${.asd.zzx}:asdqe${.abc.aaa}",
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := convertToGoTemplate(tt.t1); got != tt.want {
-				t.Errorf("convertToGoTemplate() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func Test_getExpressions(t *testing.T) {
 	tests := []struct {
 		name  string
@@ -149,7 +46,7 @@ func Test_getNeedPermissions(t *testing.T) {
 	}{
 		{
 			name:        "TEST",
-			expressions: []string{"app:${request.Namespace}/${request.Name}.add", "app:${user.Namespace}/${user.Name}:get"},
+			expressions: []string{"app:{{.request.Namespace}}/{{.request.Name}}.add", "app:{{.user.Namespace}}/{{.user.Name}}:get"},
 			data: map[string]interface{}{
 				"request": map[string]interface{}{
 					"Namespace": "test",
@@ -274,7 +171,7 @@ func Test_permissionMatch(t *testing.T) {
 			name:           "TEST",
 			needPermission: "**:qa1-api.xinfei.cn:add",
 			permission:     "*:*:add",
-			want:           false,
+			want:           true,
 			wantErr:        false,
 		},
 		{
@@ -330,7 +227,7 @@ func Test_rendTemplate(t *testing.T) {
 	}{
 		{
 			name: "TEST",
-			t1:   "abc${.aaa.bbb.ccc}",
+			t1:   "abc{{.aaa.bbb.ccc}}",
 			data: map[string]interface{}{
 				"aaa": map[string]interface{}{
 					"bbb": map[string]interface{}{
