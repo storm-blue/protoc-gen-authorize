@@ -39,13 +39,7 @@ func (a *MatchAuthorizer) AuthorizeMethod(_ context.Context, method string, para
 	// return false if no rules exist for the method
 	rules, ok := a.rules[method]
 	if !ok {
-		svc := strings.Split(method, "/")[1]
-		for k := range a.rules {
-			if strings.HasPrefix(k, "/"+svc) {
-				return true, nil
-			}
-		}
-		return false, nil
+		return true, nil
 	}
 
 	var (
